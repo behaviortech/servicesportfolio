@@ -7,6 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- SortableJS for drag-and-drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <!-- jsPDF and html2canvas for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         html, body {
             height: 100%;
@@ -25,8 +30,11 @@
         .page.active {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            min-height: 100%;
         }
+        .sortable-item { cursor: grab; }
+        .sortable-item:active { cursor: grabbing; }
+        .sortable-ghost { opacity: 0.4; background: #475569; }
     </style>
 </head>
 <body class="bg-slate-900 text-gray-300">
@@ -41,120 +49,53 @@
     </header>
 
     <!-- Main Content -->
-    <main id="service-content" class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col">
+    <main id="main-content" class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col">
 
         <!-- Page: Home Menu -->
         <section id="home-menu" class="page">
-            <header class="mb-12 text-center">
-                <h2 class="text-4xl font-bold text-white">Nosso Portfólio de Serviços</h2>
-                <p class="mt-2 text-base italic text-gray-400">Soluções baseadas em ciência do comportamento para transformar o potencial humano em resultados.</p>
-            </header>
-            <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Service cards will be dynamically inserted here by JavaScript -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <header class="mb-8">
+                        <h2 class="text-4xl font-bold text-white">Nosso Portfólio de Serviços</h2>
+                        <p class="mt-2 text-base italic text-gray-400">Selecione os serviços de seu interesse para montar uma proposta personalizada.</p>
+                    </header>
+                    <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Service cards will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div class="lg:col-span-1">
+                    <div class="bg-slate-800 rounded-xl shadow-lg p-6 sticky top-28">
+                        <h3 class="text-2xl font-bold text-white mb-2">Sua Proposta Personalizada</h3>
+                        <p class="text-xs text-gray-500 mb-4">Arraste os serviços para organizar por prioridade.</p>
+                        <div id="selected-services-list" class="space-y-3 min-h-[100px]">
+                            <p id="empty-list-message" class="text-gray-400 text-center py-8">Nenhum serviço selecionado.</p>
+                        </div>
+                        <div id="finalize-button-container" class="mt-6 hidden">
+                            <button id="finalize-selection-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300">
+                                Gerar Proposta
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Page: Problem-Behaviors Intervention -->
-        <section id="problem-behaviors" class="page service-page">
-            <a href="#home-menu" class="back-to-menu-btn inline-flex items-center text-blue-400 hover:text-blue-300 mb-8 transition-colors duration-300">
+        <!-- Page: Proposal Review -->
+        <section id="proposal-review" class="page">
+            <a href="#home-menu" class="back-to-menu-btn inline-flex items-center text-blue-400 hover:text-blue-300 mb-8 transition-colors duration-300 w-fit">
                 <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
-                Voltar ao Menu
+                Voltar e Editar Seleção
             </a>
-            <header class="mb-12">
-                <h2 class="text-4xl font-bold text-white">Problem-Behaviors Intervention</h2>
-                <p class="mt-2 text-base italic text-gray-400">Soluções focadas na análise e intervenção de comportamentos-problema para otimizar o ambiente de trabalho e a produtividade.</p>
-            </header>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <!-- Component Card: Functional Analysis -->
-                <div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-blue-400">Functional Analysis</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Análise aprofundada para identificar as funções e gatilhos de comportamentos específicos.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-blue-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Mapeamento de Variáveis</li><li>Observação Direta</li><li>Formulação de Hipóteses</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-blue-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Relatório de análise funcional e plano de ação.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-blue-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">1 a 3 semanas</p></div></div></div></div>
-                <!-- Component Card: Solution Blueprint -->
-                <div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-blue-400">Solution Blueprint</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Desenvolvimento de um plano de intervenção customizado e baseado em evidências.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-blue-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Avaliação de Técnicas</li><li>Construção Colaborativa</li><li>Especificação da Intervenção</li><li>Definição de Indicadores</li><li>Condução e Acompanhamento</li><li>Coleta de Dados</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-blue-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Relatório de mensuração pós-intervenção.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-blue-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">2 a 6 semanas</p></div></div></div></div>
-                <!-- Component Card: Solution's Impact Review -->
-                <div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-blue-400">Solution's Impact Review</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Avaliação dos resultados da intervenção para garantir eficácia e sustentabilidade.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-blue-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Comparação de Métricas</li><li>Apresentação Gráfica dos Dados</li><li>Avaliação da Eficácia</li><li>Ajuste do Plano de Ação</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-blue-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Relatório de revisão de impacto com métricas.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-blue-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">1 a 2 semanas</p></div></div></div></div>
+            <div id="proposal-content">
+                <!-- Proposal content will be dynamically inserted here -->
+            </div>
+             <div class="mt-12 text-center">
+                <button id="confirm-proposal-btn" class="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 text-lg">
+                    Confirmar e Baixar PDF
+                </button>
             </div>
         </section>
 
-        <!-- Page: Gestão de Talentos (Operacional) -->
-        <section id="talentos-operacional" class="page service-page">
-            <a href="#home-menu" class="back-to-menu-btn inline-flex items-center text-teal-400 hover:text-teal-300 mb-8 transition-colors duration-300"><i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>Voltar ao Menu</a>
-            <header class="mb-12"><h2 class="text-4xl font-bold text-white">Gestão de Talentos (Operacional)</h2><p class="mt-2 text-base italic text-gray-400">Estratégias para o ciclo contínuo do colaborador, da atração ao desenvolvimento.</p></header>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <!-- Component Card: Aquisição de Talentos --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-teal-400">Aquisição de Talentos</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Processo seletivo estruturado para atrair e contratar os melhores profissionais.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Validação da Vaga</li><li>Divulgação e Triagem</li><li>Aplicação de Técnicas de Seleção</li><li>Avaliação da Eficácia</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Relatório mensal dos processos seletivos.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Até 5 semanas</p></div></div></div></div>
-                <!-- Component Card: Design de Cargos --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-teal-400">Design de Cargos</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Revisão e atualização das descrições de cargos para refletir as necessidades do negócio.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Validação de Mudanças</li><li>Revisão das Definições</li><li>Mapeamento de Lacunas</li><li>Atualização do Organograma</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Arquivo com descrições de cargos revisadas.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">3 a 4 semanas</p></div></div></div></div>
-                <!-- Component Card: Planejamento de Carreira --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-teal-400">Planejamento de Carreira</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Suporte ao desenvolvimento profissional dos colaboradores com avaliações e PDIs.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Entrevistas de Planejamento</li><li>Suporte a Avaliações</li><li>Consolidação de Resultados</li><li>Atualização da Estrutura</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">PDIs atualizados.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">4 semanas</p></div></div></div></div>
-                <!-- Component Card: Treinamento e Desenvolvimento --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-teal-400">Treinamento e Desenvolvimento</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Gestão de treinamentos internos e externos para capacitação contínua da equipe.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Mapeamento e Validação</li><li>Gestão de Treinamentos Externos</li><li>Preparação de Treinamentos Internos</li><li>Acompanhamento</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Pipeline de treinamentos.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">3 a 6 semanas</p></div></div></div></div>
-                <!-- Component Card: Plano de Compensação --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-teal-400">Plano de Compensação</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Análise e definição de uma política de remuneração competitiva e justa.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Benchmarking de Remuneração</li><li>Avaliação do Plano Atual</li><li>Validação com Stakeholders</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Estudo comparativo de faixas salariais.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-teal-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">4 semanas</p></div></div></div></div>
-            </div>
-        </section>
-
-        <!-- Page: Gestão de Talentos (Estratégico) -->
-        <section id="talentos-estrategico" class="page service-page">
-            <a href="#home-menu" class="back-to-menu-btn inline-flex items-center text-cyan-400 hover:text-cyan-300 mb-8 transition-colors duration-300"><i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>Voltar ao Menu</a>
-            <header class="mb-12"><h2 class="text-4xl font-bold text-white">Gestão de Talentos (Estratégico)</h2><p class="mt-2 text-base italic text-gray-400">Iniciativas para construir uma cultura forte e preparar a organização para o futuro.</p></header>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <!-- Component Card: Planejamento Sucessório --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-cyan-400">Planejamento Sucessório</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Identificação e desenvolvimento de futuros líderes para garantir a continuidade do negócio.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Mapeamento de Cargos Críticos</li><li>Classificação de Candidatos Internos</li><li>Elaboração de PDIs para Sucessores</li><li>Checkpoints Semestrais</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Matriz de sucessão com perfis e PDIs.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">4 a 8 semanas</p></div></div></div></div>
-                <!-- Component Card: Onboarding --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-cyan-400">Onboarding</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Programa de integração para garantir que novos colaboradores se sintam bem-vindos e produtivos.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Comunicação Pré-início</li><li>Recepção e Integração</li><li>Orientação Cultural</li><li>Checkpoints (30, 60, 90 dias)</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Manual de onboarding com cronograma.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">4 a 6 semanas</p></div></div></div></div>
-                <!-- Component Card: Offboarding --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-cyan-400">Offboarding</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Processo de desligamento humanizado que preserva o relacionamento e gera insights.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Formalização do Desligamento</li><li>Transferência de Conhecimento</li><li>Entrevista de Saída</li><li>Avaliação do Processo</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Guia de offboarding com roteiro e checklist.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">1 a 4 semanas</p></div></div></div></div>
-                <!-- Component Card: Elaboração de Código de Conduta --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-cyan-400">Elaboração de Código de Conduta</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Criação de um guia claro de ética e comportamento para toda a organização.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Pesquisa e Levantamento</li><li>Validação do Esboço</li><li>Aprovação e Publicação</li><li>Realização de Treinamentos</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Documento oficial do Código de Conduta.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">4 a 6 semanas</p></div></div></div></div>
-                <!-- Component Card: Avaliação de Engajamento --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-cyan-400">Avaliação de Engajamento</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Pesquisa de clima para medir a satisfação e o engajamento dos colaboradores.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Definição de Indicadores</li><li>Desenvolvimento de Ferramentas</li><li>Avaliação de Resultados</li><li>Validação dos Planos de Ação</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Relatório da pesquisa de clima com plano de ação.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-cyan-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">4 a 6 semanas</p></div></div></div></div>
-            </div>
-        </section>
-
-        <!-- Page: Well-being Initiatives -->
-        <section id="well-being" class="page service-page">
-            <a href="#home-menu" class="back-to-menu-btn inline-flex items-center text-green-400 hover:text-green-300 mb-8 transition-colors duration-300"><i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>Voltar ao Menu</a>
-            <header class="mb-12"><h2 class="text-4xl font-bold text-white">Well-being Initiatives</h2><p class="mt-2 text-base italic text-gray-400">Iniciativas para promover a saúde mental, física e o bem-estar geral dos colaboradores.</p></header>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <!-- Component Card: Aconselhamento Psicológico Breve --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-green-400">Aconselhamento Psicológico Breve</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Suporte psicológico focado e de curta duração para questões específicas.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-green-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Levantamento de Necessidades</li><li>Análise e Planejamento</li><li>Realização das Sessões</li><li>Encerramento e Follow-up</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-green-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Prontuários individuais com evoluções.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-green-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">6 a 12 encontros</p></div></div></div></div>
-                <!-- Component Card: Plano Individual de Bem-Estar --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-green-400">Plano Individual de Bem-Estar</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Roteiros personalizados para integrar saúde mental, física e propósito de vida.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-green-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Avaliação Inicial</li><li>Definição de Metas Pessoais</li><li>Desenho do Plano</li><li>Implementação e Monitoramento</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-green-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Prontuários individuais com plano de ação.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-green-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">4 a 6 semanas (implementação)</p></div></div></div></div>
-                <!-- Component Card: Workshops de Autoconhecimento --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-green-400">Workshops de Autoconhecimento</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Pequenas palestras sobre temas-chave para bem-estar no trabalho.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-green-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Diagnóstico de Necessidades</li><li>Desenvolvimento de Conteúdo</li><li>Planejamento Logístico</li><li>Condução e Feedback</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-green-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Relatório de realização com materiais.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-green-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">4 a 6 semanas</p></div></div></div></div>
-            </div>
-        </section>
-
-        <!-- Page: People Strategy and Analytics -->
-        <section id="people-strategy" class="page service-page">
-            <a href="#home-menu" class="back-to-menu-btn inline-flex items-center text-purple-400 hover:text-purple-300 mb-8 transition-colors duration-300"><i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>Voltar ao Menu</a>
-            <header class="mb-12"><h2 class="text-4xl font-bold text-white">People Strategy & Analytics</h2><p class="mt-2 text-base italic text-gray-400">Decisões estratégicas de RH baseadas em dados para impulsionar o desempenho organizacional.</p></header>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <!-- Component Card: Gestão de Talentos Estratégica --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-purple-400">Gestão de Talentos Estratégica</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Alinhamento do capital humano com os objetivos de longo prazo da empresa.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-purple-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Arquitetura de Talentos</li><li>Análise de Cenários de Negócio</li><li>Modelagem de Gaps Futuros</li><li>Portfólio de Ações Estratégicas</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-purple-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Relatório integrado de Gestão de Talentos.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-purple-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">8 semanas</p></div></div></div></div>
-                <!-- Component Card: People Analytics --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-purple-400">People Analytics</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Uso de dados para gerar insights sobre a força de trabalho e guiar decisões.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-purple-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Alinhamento Estratégico</li><li>Governança de Dados</li><li>Integração e Dashboards</li><li>Capacitação e Governança</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-purple-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Relatório mensal integrado.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-purple-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">4 semanas por sprint</p></div></div></div></div>
-                <!-- Component Card: Employer Branding --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-purple-400">Employer Branding</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Construção de uma marca empregadora forte para atrair e reter talentos.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-purple-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Auditoria de Marca Empregadora</li><li>Definição de EVP</li><li>Comunicação Omnichannel</li><li>Medição de Resultados</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-purple-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Plano de employer branding com estratégia.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-purple-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">6 semanas</p></div></div></div></div>
-            </div>
-        </section>
-
-        <!-- Page: Mentoria e Desenvolvimento de Lideranças -->
-        <section id="mentoria-lideranca" class="page service-page">
-            <a href="#home-menu" class="back-to-menu-btn inline-flex items-center text-amber-400 hover:text-amber-300 mb-8 transition-colors duration-300"><i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>Voltar ao Menu</a>
-            <header class="mb-12"><h2 class="text-4xl font-bold text-white">Mentoria e Liderança</h2><p class="mt-2 text-base italic text-gray-400">Programas para desenvolver e capacitar líderes em todos os níveis da organização.</p></header>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <!-- Component Card: Programa de Desenvolvimento de Líderes --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-amber-400">Programa de Desenvolvimento de Líderes</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Estrutura de mentoria para mapear e desenvolver competências de liderança.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-amber-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Diagnóstico e Definição de Objetivos</li><li>Design do Programa e Pareamento</li><li>Condução das Sessões</li><li>Avaliação e Acompanhamento</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-amber-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Prontuários individuais com plano de mentoria.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-amber-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">4 a 12 semanas por ciclo</p></div></div></div></div>
-                <!-- Component Card: High Performance Leadership --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-amber-400">High Performance Leadership</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Mentoria focada em resultados para líderes que buscam alta performance.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-amber-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Briefing Estratégico</li><li>Avaliação de Competências</li><li>Plano de Ação Individualizado</li><li>Mentoria e Follow-up</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-amber-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Prontuários individuais com plano de ação.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-amber-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">24 semanas por ciclo</p></div></div></div></div>
-                <!-- Component Card: C-Level Strategic Mentorship --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-amber-400">C-Level Strategic Mentorship</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Aconselhamento estratégico para executivos de alto escalão.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-amber-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Alinhamento de Escopo</li><li>Preparação de Análises</li><li>Condução de Sessões Estratégicas</li><li>Revisão e Suporte Contínuo</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-amber-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Atas de reuniões estratégicas com análises.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-amber-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Até 26 semanas por ciclo</p></div></div></div></div>
-            </div>
-        </section>
-
-        <!-- Page: Gestão de Desempenho -->
-        <section id="gestao-desempenho" class="page service-page">
-            <a href="#home-menu" class="back-to-menu-btn inline-flex items-center text-rose-400 hover:text-rose-300 mb-8 transition-colors duration-300"><i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>Voltar ao Menu</a>
-            <header class="mb-12"><h2 class="text-4xl font-bold text-white">Gestão de Desempenho</h2><p class="mt-2 text-base italic text-gray-400">Sistemas e ferramentas para definir, medir e motivar o desempenho de equipes e indivíduos.</p></header>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <!-- Component Card: Key Performance Descriptions --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-rose-400">Key Performance Descriptions</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Padronização e alinhamento de KPIs com os objetivos estratégicos da empresa.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-rose-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Revisão de Relevância</li><li>Refinamento de Definições</li><li>Aprovação e Padronização</li><li>Planejamento de Implementação</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-rose-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Documento com definições de KPIs.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-rose-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">4 semanas</p></div></div></div></div>
-                <!-- Component Card: Motivational Toolkit --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-rose-400">Motivational Toolkit</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Criação de um manual com estratégias de reforçamento e reconhecimento.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-rose-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Seleção de Estratégias</li><li>Customização de Reforçadores</li><li>Compilação de Materiais</li><li>Revisão e Aprovação</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-rose-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Manual de estratégias de reforçamento.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-rose-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">3 semanas</p></div></div></div></div>
-                <!-- Component Card: Campanhas de Desempenho --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-rose-400">Campanhas de Desempenho</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Sprints de desempenho para focar em metas específicas e motivar equipes.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-rose-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Definição do Tema</li><li>Planejamento da Sprint</li><li>Monitoramento da Execução</li><li>Avaliação de Resultados</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-rose-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Plano de campanha e relatório de resultados.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-rose-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">2 a 3 semanas (preparação)</p></div></div></div></div>
-            </div>
-        </section>
-
-        <!-- Page: Documentação de Processos -->
-        <section id="documentacao-processos" class="page service-page">
-            <a href="#home-menu" class="back-to-menu-btn inline-flex items-center text-sky-400 hover:text-sky-300 mb-8 transition-colors duration-300"><i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>Voltar ao Menu</a>
-            <header class="mb-12"><h2 class="text-4xl font-bold text-white">Documentação de Processos</h2><p class="mt-2 text-base italic text-gray-400">Criação de playbooks e manuais para padronizar e otimizar as operações de RH.</p></header>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <!-- Component Card: Processos de Aquisição de Talentos --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-sky-400">Processos de Aquisição de Talentos</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Padronização do processo de recrutamento, desde a vaga até a seleção.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-sky-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Padronização da Descrição de Vaga</li><li>Estratégias de Recrutamento</li><li>Técnicas de Entrevista e Avaliação</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-sky-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Playbook de aquisição de talentos.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-sky-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">6 semanas</p></div></div></div></div>
-                <!-- Component Card: Processos de Plano de Carreira --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-sky-400">Processos de Plano de Carreira</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Documentação de toda a jornada do colaborador, do onboarding ao offboarding.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-sky-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Mapeamento da Jornada</li><li>Protocolos de Onboarding/Offboarding</li><li>Estratégias de Entrevista de Carreira</li><li>Modelo de PDI</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-sky-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Playbook do Plano de Carreira.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-sky-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">8 semanas</p></div></div></div></div>
-                <!-- Component Card: Processos de Performance Management System --><div class="bg-slate-800 rounded-xl shadow-lg overflow-hidden flex flex-col h-full"><div class="p-6 md:p-8 flex-grow"><h3 class="text-2xl font-bold text-sky-400">Processos de Performance Management</h3><p class="mt-1 text-sm italic text-gray-400 mb-6">Diretrizes e procedimentos para um sistema de gestão de desempenho eficaz.</p><div class="space-y-4"><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-sky-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1"><li>Critérios para Desempenhos-Chave</li><li>Estratégias de Mensuração</li><li>Guia para Elaboração de Metas</li><li>Protocolo de Campanhas</li></ul></div></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-sky-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">Playbook de Gestão de Desempenho.</p></div><div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-sky-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">8 semanas</p></div></div></div></div>
-            </div>
-        </section>
-        
     </main>
 
     <!-- Footer -->
@@ -166,41 +107,215 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
             const pages = document.querySelectorAll('.page');
             const menuGrid = document.getElementById('menu-grid');
+            const selectedServicesList = document.getElementById('selected-services-list');
+            const emptyListMessage = document.getElementById('empty-list-message');
+            const finalizeButtonContainer = document.getElementById('finalize-button-container');
+            const finalizeSelectionBtn = document.getElementById('finalize-selection-btn');
+            const proposalContent = document.getElementById('proposal-content');
+            const confirmProposalBtn = document.getElementById('confirm-proposal-btn');
             
-            const services = [
-                { id: 'documentacao-processos', title: 'Documentação de Processos', description: 'Criação de playbooks e manuais para padronizar e otimizar as operações de RH.', color: 'sky' },
-                { id: 'gestao-desempenho', title: 'Gestão de Desempenho', description: 'Sistemas e ferramentas para definir, medir e motivar o desempenho de equipes e indivíduos.', color: 'rose' },
-                { id: 'talentos-estrategico', title: 'Gestão de Talentos (Estratégico)', description: 'Iniciativas para construir uma cultura forte e preparar a organização para o futuro.', color: 'cyan' },
-                { id: 'talentos-operacional', title: 'Gestão de Talentos (Operacional)', description: 'Estratégias para o ciclo contínuo do colaborador, da atração ao desenvolvimento.', color: 'teal' },
-                { id: 'mentoria-lideranca', title: 'Mentoria & Liderança', description: 'Programas para desenvolver e capacitar líderes em todos os níveis da organização.', color: 'amber' },
-                { id: 'people-strategy', title: 'People Strategy & Analytics', description: 'Decisões estratégicas de RH baseadas em dados para impulsionar o desempenho organizacional.', color: 'purple' },
-                { id: 'problem-behaviors', title: 'Problem-Behaviors Intervention', description: 'Soluções focadas na análise e intervenção de comportamentos-problema.', color: 'blue' },
-                { id: 'well-being', title: 'Well-being Initiatives', description: 'Iniciativas para promover a saúde mental, física e o bem-estar geral dos colaboradores.', color: 'green' }
-            ];
+            // Service Data
+            const servicesData = {
+                'problem-behaviors': {
+                    title: 'Problem-Behaviors Intervention',
+                    description: 'Soluções focadas na análise e intervenção de comportamentos-problema para otimizar o ambiente de trabalho e a produtividade.',
+                    color: 'blue',
+                    components: [
+                        { title: 'Functional Analysis', description: 'Análise aprofundada para identificar as funções e gatilhos de comportamentos específicos.', steps: ['Mapeamento de Variáveis', 'Observação Direta', 'Formulação de Hipóteses'], deliverable: 'Relatório de análise funcional e plano de ação.', duration: '1 a 3 semanas' },
+                        { title: 'Solution Blueprint', description: 'Desenvolvimento de um plano de intervenção customizado e baseado em evidências.', steps: ['Avaliação de Técnicas', 'Construção Colaborativa', 'Especificação da Intervenção', 'Definição de Indicadores', 'Condução e Acompanhamento', 'Coleta de Dados'], deliverable: 'Relatório de mensuração pós-intervenção.', duration: '2 a 6 semanas' },
+                        { title: 'Solution\'s Impact Review', description: 'Avaliação dos resultados da intervenção para garantir eficácia e sustentabilidade.', steps: ['Comparação de Métricas', 'Apresentação Gráfica dos Dados', 'Avaliação da Eficácia', 'Ajuste do Plano de Ação'], deliverable: 'Relatório de revisão de impacto com métricas.', duration: '1 a 2 semanas' }
+                    ]
+                },
+                'talentos-operacional': {
+                    title: 'Gestão de Talentos (Operacional)',
+                    description: 'Estratégias para o ciclo contínuo do colaborador, da atração ao desenvolvimento.',
+                    color: 'teal',
+                    components: [
+                        { title: 'Aquisição de Talentos', description: 'Processo seletivo estruturado para atrair e contratar os melhores profissionais.', steps: ['Validação da Vaga', 'Divulgação e Triagem', 'Aplicação de Técnicas de Seleção', 'Avaliação da Eficácia'], deliverable: 'Relatório mensal dos processos seletivos.', duration: 'Até 5 semanas' },
+                        { title: 'Design de Cargos', description: 'Revisão e atualização das descrições de cargos para refletir as necessidades do negócio.', steps: ['Validação de Mudanças', 'Revisão das Definições', 'Mapeamento de Lacunas', 'Atualização do Organograma'], deliverable: 'Arquivo com descrições de cargos revisadas.', duration: '3 a 4 semanas' },
+                        { title: 'Planejamento de Carreira', description: 'Suporte ao desenvolvimento profissional dos colaboradores com avaliações e PDIs.', steps: ['Entrevistas de Planejamento', 'Suporte a Avaliações', 'Consolidação de Resultados', 'Atualização da Estrutura'], deliverable: 'PDIs atualizados.', duration: '4 semanas' },
+                        { title: 'Treinamento e Desenvolvimento', description: 'Gestão de treinamentos internos e externos para capacitação contínua da equipe.', steps: ['Mapeamento e Validação', 'Gestão de Treinamentos Externos', 'Preparação de Treinamentos Internos', 'Acompanhamento'], deliverable: 'Pipeline de treinamentos.', duration: '3 a 6 semanas' },
+                        { title: 'Plano de Compensação', description: 'Análise e definição de uma política de remuneração competitiva e justa.', steps: ['Benchmarking de Remuneração', 'Avaliação do Plano Atual', 'Validação com Stakeholders'], deliverable: 'Estudo comparativo de faixas salariais.', duration: '4 semanas' },
+                    ]
+                },
+                'talentos-estrategico': {
+                    title: 'Gestão de Talentos (Estratégico)',
+                    description: 'Iniciativas para construir uma cultura forte e preparar a organização para o futuro.',
+                    color: 'cyan',
+                    components: [
+                        { title: 'Planejamento Sucessório', description: 'Identificação e desenvolvimento de futuros líderes para garantir a continuidade do negócio.', steps: ['Mapeamento de Cargos Críticos', 'Classificação de Candidatos Internos', 'Elaboração de PDIs para Sucessores', 'Checkpoints Semestrais'], deliverable: 'Matriz de sucessão com perfis e PDIs.', duration: '4 a 8 semanas' },
+                        { title: 'Onboarding', description: 'Programa de integração para garantir que novos colaboradores se sintam bem-vindos e produtivos.', steps: ['Comunicação Pré-início', 'Recepção e Integração', 'Orientação Cultural', 'Checkpoints (30, 60, 90 dias)'], deliverable: 'Manual de onboarding com cronograma.', duration: '4 a 6 semanas' },
+                        { title: 'Offboarding', description: 'Processo de desligamento humanizado que preserva o relacionamento e gera insights.', steps: ['Formalização do Desligamento', 'Transferência de Conhecimento', 'Entrevista de Saída', 'Avaliação do Processo'], deliverable: 'Guia de offboarding com roteiro e checklist.', duration: '1 a 4 semanas' },
+                        { title: 'Elaboração de Código de Conduta', description: 'Criação de um guia claro de ética e comportamento para toda a organização.', steps: ['Pesquisa e Levantamento', 'Validação do Esboço', 'Aprovação e Publicação', 'Realização de Treinamentos'], deliverable: 'Documento oficial do Código de Conduta.', duration: '4 a 6 semanas' },
+                        { title: 'Avaliação de Engajamento', description: 'Pesquisa de clima para medir a satisfação e o engajamento dos colaboradores.', steps: ['Definição de Indicadores', 'Desenvolvimento de Ferramentas', 'Avaliação de Resultados', 'Validação dos Planos de Ação'], deliverable: 'Relatório da pesquisa de clima com plano de ação.', duration: '4 a 6 semanas' },
+                    ]
+                },
+                'well-being': {
+                    title: 'Well-being Initiatives',
+                    description: 'Iniciativas para promover a saúde mental, física e o bem-estar geral dos colaboradores.',
+                    color: 'green',
+                    components: [
+                         { title: 'Aconselhamento Psicológico Breve', description: 'Suporte psicológico focado e de curta duração para questões específicas.', steps: ['Levantamento de Necessidades', 'Análise e Planejamento', 'Realização das Sessões', 'Encerramento e Follow-up'], deliverable: 'Prontuários individuais com evoluções.', duration: '6 a 12 encontros' },
+                         { title: 'Plano Individual de Bem-Estar', description: 'Roteiros personalizados para integrar saúde mental, física e propósito de vida.', steps: ['Avaliação Inicial', 'Definição de Metas Pessoais', 'Desenho do Plano', 'Implementação e Monitoramento'], deliverable: 'Prontuários individuais com plano de ação.', duration: '4 a 6 semanas (implementação)' },
+                         { title: 'Workshops de Autoconhecimento', description: 'Pequenas palestras sobre temas-chave para bem-estar no trabalho.', steps: ['Diagnóstico de Necessidades', 'Desenvolvimento de Conteúdo', 'Planejamento Logístico', 'Condução e Feedback'], deliverable: 'Relatório de realização com materiais.', duration: '4 a 6 semanas' },
+                    ]
+                },
+                'people-strategy': {
+                    title: 'People Strategy & Analytics',
+                    description: 'Decisões estratégicas de RH baseadas em dados para impulsionar o desempenho organizacional.',
+                    color: 'purple',
+                    components: [
+                        { title: 'Gestão de Talentos Estratégica', description: 'Alinhamento do capital humano com os objetivos de longo prazo da empresa.', steps: ['Arquitetura de Talentos', 'Análise de Cenários de Negócio', 'Modelagem de Gaps Futuros', 'Portfólio de Ações Estratégicas'], deliverable: 'Relatório integrado de Gestão de Talentos.', duration: '8 semanas' },
+                        { title: 'People Analytics', description: 'Uso de dados para gerar insights sobre a força de trabalho e guiar decisões.', steps: ['Alinhamento Estratégico', 'Governança de Dados', 'Integração e Dashboards', 'Capacitação e Governança'], deliverable: 'Relatório mensal integrado.', duration: '4 semanas por sprint' },
+                        { title: 'Employer Branding', description: 'Construção de uma marca empregadora forte para atrair e reter talentos.', steps: ['Auditoria de Marca Empregadora', 'Definição de EVP', 'Comunicação Omnichannel', 'Medição de Resultados'], deliverable: 'Plano de employer branding com estratégia.', duration: '6 semanas' },
+                    ]
+                },
+                'mentoria-lideranca': {
+                    title: 'Mentoria & Liderança',
+                    description: 'Programas para desenvolver e capacitar líderes em todos os níveis da organização.',
+                    color: 'amber',
+                    components: [
+                        { title: 'Programa de Desenvolvimento de Líderes', description: 'Estrutura de mentoria para mapear e desenvolver competências de liderança.', steps: ['Diagnóstico e Definição de Objetivos', 'Design do Programa e Pareamento', 'Condução das Sessões', 'Avaliação e Acompanhamento'], deliverable: 'Prontuários individuais com plano de mentoria.', duration: '4 a 12 semanas por ciclo' },
+                        { title: 'High Performance Leadership', description: 'Mentoria focada em resultados para líderes que buscam alta performance.', steps: ['Briefing Estratégico', 'Avaliação de Competências', 'Plano de Ação Individualizado', 'Mentoria e Follow-up'], deliverable: 'Prontuários individuais com plano de ação.', duration: '24 semanas por ciclo' },
+                        { title: 'C-Level Strategic Mentorship', description: 'Aconselhamento estratégico para executivos de alto escalão.', steps: ['Alinhamento de Escopo', 'Preparação de Análises', 'Condução de Sessões Estratégicas', 'Revisão e Suporte Contínuo'], deliverable: 'Atas de reuniões estratégicas com análises.', duration: 'Até 26 semanas por ciclo' },
+                    ]
+                },
+                'gestao-desempenho': {
+                    title: 'Gestão de Desempenho',
+                    description: 'Sistemas e ferramentas para definir, medir e motivar o desempenho de equipes e indivíduos.',
+                    color: 'rose',
+                    components: [
+                        { title: 'Key Performance Descriptions', description: 'Padronização e alinhamento de KPIs com os objetivos estratégicos da empresa.', steps: ['Revisão de Relevância', 'Refinamento de Definições', 'Aprovação e Padronização', 'Planejamento de Implementação'], deliverable: 'Documento com definições de KPIs.', duration: '4 semanas' },
+                        { title: 'Motivational Toolkit', description: 'Criação de um manual com estratégias de reforçamento e reconhecimento.', steps: ['Seleção de Estratégias', 'Customização de Reforçadores', 'Compilação de Materiais', 'Revisão e Aprovação'], deliverable: 'Manual de estratégias de reforçamento.', duration: '3 semanas' },
+                        { title: 'Campanhas de Desempenho', description: 'Sprints de desempenho para focar em metas específicas e motivar equipes.', steps: ['Definição do Tema', 'Planejamento da Sprint', 'Monitoramento da Execução', 'Avaliação de Resultados'], deliverable: 'Plano de campanha e relatório de resultados.', duration: '2 a 3 semanas (preparação)' },
+                    ]
+                },
+                'documentacao-processos': {
+                    title: 'Documentação de Processos',
+                    description: 'Criação de playbooks e manuais para padronizar e otimizar as operações de RH.',
+                    color: 'sky',
+                    components: [
+                        { title: 'Processos de Aquisição de Talentos', description: 'Padronização do processo de recrutamento, desde a vaga até a seleção.', steps: ['Padronização da Descrição de Vaga', 'Estratégias de Recrutamento', 'Técnicas de Entrevista e Avaliação'], deliverable: 'Playbook de aquisição de talentos.', duration: '6 semanas' },
+                        { title: 'Processos de Plano de Carreira', description: 'Documentação de toda a jornada do colaborador, do onboarding ao offboarding.', steps: ['Mapeamento da Jornada', 'Protocolos de Onboarding/Offboarding', 'Estratégias de Entrevista de Carreira', 'Modelo de PDI'], deliverable: 'Playbook do Plano de Carreira.', duration: '8 semanas' },
+                        { title: 'Processos de Performance Management', description: 'Diretrizes e procedimentos para um sistema de gestão de desempenho eficaz.', steps: ['Critérios para Desempenhos-Chave', 'Estratégias de Mensuração', 'Guia para Elaboração de Metas', 'Protocolo de Campanhas'], deliverable: 'Playbook de Gestão de Desempenho.', duration: '8 semanas' },
+                    ]
+                }
+            };
+            
+            // State
+            let orderedServices = [];
 
             // Populate home menu
-            services.forEach(service => {
-                const card = document.createElement('a');
-                card.href = `#${service.id}`;
-                card.className = `bg-slate-800 p-6 rounded-xl shadow-lg hover:shadow-blue-500/20 hover:-translate-y-1 transition-all duration-300 flex flex-col text-left border border-transparent hover:border-${service.color}-400`;
+            Object.keys(servicesData).sort((a,b) => servicesData[a].title.localeCompare(servicesData[b].title)).forEach(key => {
+                const service = servicesData[key];
+                const card = document.createElement('div');
+                card.className = `bg-slate-800 p-6 rounded-xl shadow-lg transition-all duration-300 flex flex-col text-left border border-slate-700`;
                 card.innerHTML = `
-                    <h3 class="text-xl font-bold text-${service.color}-400 mb-2">${service.title}</h3>
-                    <p class="text-gray-400 text-sm flex-grow">${service.description}</p>
-                    <div class="mt-4 text-${service.color}-400 font-semibold inline-flex items-center">
-                        Ver detalhes <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                    <div class="flex items-start justify-between">
+                        <div class="flex-grow">
+                            <h3 class="text-xl font-bold text-${service.color}-400 mb-2">${service.title}</h3>
+                            <p class="text-gray-400 text-sm flex-grow">${service.description}</p>
+                        </div>
+                        <input type="checkbox" data-service-id="${key}" class="service-checkbox ml-4 mt-1 h-5 w-5 rounded bg-slate-600 border-slate-500 text-${service.color}-400 focus:ring-2 focus:ring-${service.color}-500 focus:ring-offset-0">
                     </div>
                 `;
                 menuGrid.appendChild(card);
             });
 
+            function renderSelectedList() {
+                selectedServicesList.innerHTML = '';
+                if (orderedServices.length === 0) {
+                    selectedServicesList.appendChild(emptyListMessage);
+                    emptyListMessage.style.display = 'block';
+                    finalizeButtonContainer.classList.add('hidden');
+                } else {
+                    emptyListMessage.style.display = 'none';
+                    finalizeButtonContainer.classList.remove('hidden');
+                    orderedServices.forEach(serviceId => {
+                        const service = servicesData[serviceId];
+                        const listItem = document.createElement('div');
+                        listItem.className = `sortable-item bg-slate-700 p-3 rounded-lg flex items-center justify-between shadow`;
+                        listItem.dataset.id = serviceId;
+                        listItem.innerHTML = `
+                            <div class="flex items-center">
+                                <i data-lucide="grip-vertical" class="w-5 h-5 mr-3 text-gray-500"></i>
+                                <span class="font-semibold text-white">${service.title}</span>
+                            </div>
+                            <button class="remove-btn text-red-400 hover:text-red-300" data-service-id="${serviceId}">
+                                <i data-lucide="x-circle" class="w-5 h-5"></i>
+                            </button>
+                        `;
+                        selectedServicesList.appendChild(listItem);
+                    });
+                    lucide.createIcons();
+                }
+            }
+            
+            menuGrid.addEventListener('change', (e) => {
+                if (e.target.classList.contains('service-checkbox')) {
+                    const serviceId = e.target.dataset.serviceId;
+                    if (e.target.checked) {
+                        orderedServices.push(serviceId);
+                    } else {
+                        orderedServices = orderedServices.filter(id => id !== serviceId);
+                    }
+                    renderSelectedList();
+                }
+            });
+
+            selectedServicesList.addEventListener('click', (e) => {
+                const removeButton = e.target.closest('.remove-btn');
+                if (removeButton) {
+                    const serviceId = removeButton.dataset.serviceId;
+                    orderedServices = orderedServices.filter(id => id !== serviceId);
+                    const checkbox = menuGrid.querySelector(`.service-checkbox[data-service-id="${serviceId}"]`);
+                    if (checkbox) checkbox.checked = false;
+                    renderSelectedList();
+                }
+            });
+
+            new Sortable(selectedServicesList, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    const newOrder = Array.from(evt.to.children).map(item => item.dataset.id).filter(id => id);
+                    orderedServices = newOrder;
+                },
+            });
+
+            function generateProposalPage() {
+                proposalContent.innerHTML = ''; // Clear previous content
+                let proposalHTML = `<header class="mb-12 text-center"><h1 class="text-4xl font-bold text-white">Proposta de Serviços Personalizada</h1><p class="mt-2 text-lg text-gray-400">Preparada para suas necessidades por R+ Behavior Technologies</p></header>`;
+                
+                orderedServices.forEach(serviceId => {
+                    const service = servicesData[serviceId];
+                    proposalHTML += `<section class="mb-12"><h2 class="text-3xl font-bold text-white border-b-2 border-${service.color}-400 pb-2 mb-6">${service.title}</h2><div class="space-y-8">`;
+                    service.components.forEach(component => {
+                        proposalHTML += `
+                            <div class="bg-slate-800 rounded-xl shadow-lg p-6">
+                                <h3 class="text-2xl font-bold text-${service.color}-400">${component.title}</h3>
+                                <p class="mt-1 text-sm italic text-gray-400 mb-6">${component.description}</p>
+                                <div class="space-y-4">
+                                    <div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="list-checks" class="w-6 h-6 mr-4 text-${service.color}-400 flex-shrink-0 mt-1"></i><div><ul class="list-disc list-inside text-gray-300 space-y-1">${component.steps.map(step => `<li>${step}</li>`).join('')}</ul></div></div>
+                                    <div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="file-text" class="w-6 h-6 mr-4 text-${service.color}-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">${component.deliverable}</p></div>
+                                    <div class="bg-slate-700 rounded-lg p-4 flex items-start"><i data-lucide="clock" class="w-6 h-6 mr-4 text-${service.color}-400 flex-shrink-0 mt-1"></i><p class="text-gray-300">${component.duration}</p></div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    proposalHTML += `</div></section>`;
+                });
+                proposalContent.innerHTML = proposalHTML;
+                lucide.createIcons();
+            }
+
             function showPage(hash) {
                 pages.forEach(page => page.classList.remove('active'));
                 const targetPage = document.querySelector(hash);
-                if (targetPage) {
-                    targetPage.classList.add('active');
-                }
+                if (targetPage) targetPage.classList.add('active');
             }
 
             function handleNavigation() {
@@ -209,10 +324,68 @@
             }
             
             window.addEventListener('hashchange', handleNavigation);
-            
-            // Initial page load
-            handleNavigation();
+            document.querySelectorAll('.back-to-menu-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.hash = '#home-menu';
+                });
+            });
 
+            finalizeSelectionBtn.addEventListener('click', () => {
+                if (orderedServices.length > 0) {
+                    generateProposalPage();
+                    window.location.hash = '#proposal-review';
+                }
+            });
+
+            confirmProposalBtn.addEventListener('click', async () => {
+                alert('Sua proposta será preparada para download. Por favor, aguarde.');
+
+                confirmProposalBtn.disabled = true;
+                confirmProposalBtn.innerHTML = '<div class="w-6 h-6 border-4 border-t-transparent border-white rounded-full animate-spin mx-auto"></div>';
+                
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF({
+                        orientation: 'p',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+                    const contentToPrint = document.getElementById('proposal-content');
+                    
+                    const canvas = await html2canvas(contentToPrint, { scale: 2, backgroundColor: '#0f172a' });
+                    const imgData = canvas.toDataURL('image/png');
+                    
+                    const imgProps = pdf.getImageProperties(imgData);
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                    let heightLeft = pdfHeight;
+                    let position = 0;
+
+                    pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+                    heightLeft -= pdf.internal.pageSize.getHeight();
+
+                    while (heightLeft >= 0) {
+                        position = heightLeft - pdfHeight;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+                        heightLeft -= pdf.internal.pageSize.getHeight();
+                    }
+                    
+                    pdf.save('Proposta_R+Behavior_Technologies.pdf');
+
+                } catch (error) {
+                    console.error("Erro ao gerar PDF:", error);
+                    alert("Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.");
+                } finally {
+                    confirmProposalBtn.disabled = false;
+                    confirmProposalBtn.textContent = 'Confirmar e Baixar PDF';
+                }
+            });
+
+            // Initial setup
+            handleNavigation();
+            renderSelectedList();
             lucide.createIcons();
         });
     </script>
